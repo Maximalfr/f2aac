@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+# Requirement:
+# mutagen (1.39-1)
+# fdkaac (0.6.3-1)
 # TODO add args to modify encoder param
 # TODO dectection of file format in input for directory
 # TODO add parallel encoding
@@ -12,19 +15,19 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.4.1-4"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
-f2aac_version = __version__  # legacy
+__version__ = "0.4.1-5"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+f2aac_version = __version__
 verbose = True
 
 
 class doc():
     """Contains all help strings for argparse"""
-    DESC = "Convert flac file to aac file"
+    DESC = "Convert flac and mp3 file to aac file"
     INPUT = "flac file or directory which contains flac files"
     FORMAT = "if the input is a directory, the file format is required. \
     (mp3, flac). ex: f2aac dir -f mp3"
     OUT = "output directory"
-    QUIET = "Don't print progress messages"
+    QUIET = "don't print progress messages"
     VERSION = "print the version of the script."
 
 
@@ -49,12 +52,11 @@ def listfile(path=None, ext=''):
 
 
 def tag(mp4_file, input_file, tag=True, cover=True):
-    """Tag the mp4 file with tags of the input_file.
+    """Tag the mp4 file with input_file's tags.
     We can choose to put just the cover of the input file into the mp4 file:
     - tag = False
     or just tags:
     - cover = False.
-    Actually, this function works just for flac file in input
     """
     def _tag(infos):
         m4a = EasyMP4(mp4_file)
