@@ -3,7 +3,6 @@
 # mutagen (1.39-1)
 # fdkaac (0.6.3-1)
 # TODO add args to modify encoder param
-# TODO dectection of file format in input for directory
 # TODO add parallel encoding
 
 import subprocess
@@ -15,7 +14,7 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.4.1-5"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+__version__ = "0.5.0-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
 
@@ -24,8 +23,6 @@ class doc():
     """Contains all help strings for argparse"""
     DESC = "Convert flac and mp3 file to aac file"
     INPUT = "flac file or directory which contains flac files"
-    FORMAT = "if the input is a directory, the file format is required. \
-    (mp3, flac). ex: f2aac dir -f mp3"
     OUT = "output directory"
     QUIET = "don't print progress messages"
     VERSION = "print the version of the script."
@@ -38,15 +35,17 @@ def print_verb(message):
         print(message)
 
 
-def listfile(path=None, ext=''):
+def listfile(path):
     """ List all the files in a directory.
     Return a list which contains DirEntry Object.
-    We can filter files by extensions.
+    Files are filtered by extension (mp3, flac).
     """
     files = []
     with os.scandir(path) as it:
         for entry in it:
-            if entry.name.endswith(ext) and entry.is_file():
+            if (entry.name.endswith('.flac') or entry.name.endswith('.mp3')) \
+                 and entry.is_file():
+
                 files.append(entry)
     return files
 
@@ -140,7 +139,6 @@ def main(argv):
     global verbose
     parser = argparse.ArgumentParser(description=doc.DESC)
     parser.add_argument('input', help=doc.INPUT)
-    parser.add_argument('-f', metavar='FORMAT', dest='format', help=doc.FORMAT)
     parser.add_argument('-o', metavar='OUTPUT_DIR', dest='out', help=doc.OUT)
     parser.add_argument('-q', dest='quiet', action='store_true', help=doc.QUIET)
     parser.add_argument('--version', action='version', help=doc.VERSION,
@@ -152,12 +150,8 @@ def main(argv):
         if results.quiet:
             verbose = False
         if os.path.isdir(results.input):
-            if results.format:
-                # Select only files with the format put in argument.
-                for f in listfile(results.input, '.'+results.format):
-                    encoder(f, results.out)
-            else:
-                print("The format is needed for a directory!")
+            for f in listfile(results.input):
+                encoder(f, results.out)
         else:
             encoder(results.input, results.out)
 
