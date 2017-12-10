@@ -1,7 +1,7 @@
 # f2aac
 Script to easily encode audio files in aac format.
-F2acc can convert mp3 and flac file.
-The input can be a fil or a directory.
+f2acc can convert mp3 and flac file.
+The input can be a file or a directory.
 For the moment, encoding parameters are aac VBR V5 (the max). For more information, see fdkaac doc.
 
 ## Requirement
