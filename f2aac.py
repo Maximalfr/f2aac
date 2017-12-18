@@ -14,7 +14,7 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.5.0-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+__version__ = "0.5.1-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
 
@@ -88,7 +88,7 @@ def tag(mp4_file, input_file, tag=True, cover=True):
             # Pictures
             mp3 = MP3(input_file)
             m4a = MP4(mp4_file)
-            if mp3.get('APIC:' is not None):
+            if mp3.get('APIC:') is not None:
                 m4a['covr'] = [mp3.get('APIC:').data]
                 m4a.save()
 
