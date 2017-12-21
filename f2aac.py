@@ -2,6 +2,7 @@
 # Requirement:
 # mutagen (1.39-1)
 # fdkaac (0.6.3-1)
+# ffmpeg
 # TODO add args to modify encoder param
 # TODO add parallel encoding
 
