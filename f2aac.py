@@ -4,18 +4,23 @@
 # fdkaac (0.6.3-1)
 # ffmpeg
 # TODO add args to modify encoder param
-# TODO add parallel encoding
+# TODO fix the print issue with parallel encoding
+# TODO fix the bug with invisible text in terminal after convert a directory.
+#      Maybe it's the threading (reset)
+# TODO Add arg to choose the number of threads for encoding
 
 import subprocess
 import os
 import sys
 import argparse
+import threading
+from time import sleep
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.5.1-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+__version__ = "0.6.0-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
 
@@ -150,12 +155,15 @@ def main(argv):
     if results:
         if results.quiet:
             verbose = False
-        if os.path.isdir(results.input):
+        if os.path.isdir(results.input):  # If it's a directory
             for f in listfile(results.input):
-                encoder(f, results.out)
+                while threading.active_count() > 4:  # 4 threads
+                    sleep(0.5)
+                threading.Thread(target=encoder, args=[f, results.out]).start()
         else:
             encoder(results.input, results.out)
 
+    exit(0)  # Useless?
 
 if __name__ == "__main__":
     main(sys.argv[1:])
