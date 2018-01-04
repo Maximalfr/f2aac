@@ -20,7 +20,7 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.6.0-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+__version__ = "0.6.0-1"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
 
@@ -163,7 +163,9 @@ def main(argv):
         else:
             encoder(results.input, results.out)
 
+    os.system('stty sane')  # Temporary fix for the terminal issue
     exit(0)  # Useless?
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
