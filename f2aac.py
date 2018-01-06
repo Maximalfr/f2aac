@@ -20,7 +20,7 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.6.0-1"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+__version__ = "0.6.0-2"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
 
@@ -28,7 +28,7 @@ verbose = True
 class doc():
     """Contains all help strings for argparse"""
     DESC = "Convert flac and mp3 file to aac file"
-    INPUT = "flac file or directory which contains flac files"
+    INPUT = "file or directory"
     OUT = "output directory"
     QUIET = "don't print progress messages"
     VERSION = "print the version of the script."
