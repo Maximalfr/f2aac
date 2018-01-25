@@ -20,7 +20,7 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.6.0-2"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+__version__ = "0.6.1-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
 
@@ -117,7 +117,10 @@ def encoder(input_file, output_directory=None):
 
     if output_directory:
         if os.path.isdir(output_directory) is False:  # create the dir if not exist
-            os.makedirs(output_directory)
+            try:
+                os.makedirs(output_directory)
+            except FileExistsError:  # due to threading
+                pass
         if output_directory.endswith('/') is False:  # add '/' if not exist
             output_directory += '/'
 
