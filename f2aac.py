@@ -4,7 +4,6 @@
 # fdkaac (0.6.3-1)
 # ffmpeg
 # TODO add args to modify encoder param
-# TODO fix the print issue with parallel encoding
 # TODO fix the bug with invisible text in terminal after convert a directory.
 #      Maybe it's the threading (reset)
 # TODO Add arg to choose the number of threads for encoding
@@ -23,6 +22,30 @@ from mutagen.mp4 import MP4, MP4Cover
 __version__ = "0.6.1-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
+
+# https://gist.github.com/aubricus/f91fb55dc6ba5557fbab06119420dd6a
+# Print iterations progress
+def print_progress(iteration, total, prefix='', suffix='', decimals=1, bar_length=100):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        bar_length  - Optional  : character length of bar (Int)
+    """
+    str_format = "{0:." + str(decimals) + "f}"
+    percents = str_format.format(100 * (iteration / float(total)))
+    filled_length = int(round(bar_length * iteration / float(total)))
+    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+
+    sys.stdout.write('\r%s |%s| %s%s %s' % (prefix, bar, percents, '%', suffix)),
+
+    if iteration == total:
+        sys.stdout.write('\n')
+    sys.stdout.flush()
 
 
 class doc():
@@ -144,6 +167,20 @@ def encoder(input_file, output_directory=None):
     print_verb("Tag : %s \n" % input_name)
 
 
+def run_directoy(filepaths, out,  nb_threads=4):
+    # filepaths is a list with direntrys
+    #index = -nb_threads  # It's to avoid running threads. We want only the finished threads
+    index = 0
+    for f in filepaths:
+        while threading.active_count() > nb_threads:
+            sleep(0.5)
+        index += 1
+        threading.Thread(target=encoder, args=[f, out]).start()
+        if index >= 0:
+            rows, columns = os.popen('stty size', 'r').read().split()
+            print_progress(index, len(filepaths), bar_length=(int(columns) - 15))
+
+
 def main(argv):
     global verbose
     parser = argparse.ArgumentParser(description=doc.DESC)
@@ -159,10 +196,8 @@ def main(argv):
         if results.quiet:
             verbose = False
         if os.path.isdir(results.input):  # If it's a directory
-            for f in listfile(results.input):
-                while threading.active_count() > 4:  # 4 threads
-                    sleep(0.5)
-                threading.Thread(target=encoder, args=[f, results.out]).start()
+            verbose = False
+            run_directoy(listfile(results.input), results.out)
         else:
             encoder(results.input, results.out)
 
