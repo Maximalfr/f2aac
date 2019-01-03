@@ -6,7 +6,6 @@
 # TODO add args to modify encoder param
 # TODO fix the bug with invisible text in terminal after convert a directory.
 #      Maybe it's the threading (reset)
-# TODO Add arg to choose the number of threads for encoding
 
 import subprocess
 import os
@@ -19,7 +18,7 @@ from mutagen.mp3 import MP3, EasyMP3
 from mutagen.easymp4 import EasyMP4, EasyMP4KeyError
 from mutagen.mp4 import MP4, MP4Cover
 
-__version__ = "0.6.1-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
+__version__ = "0.7.0-0"  # major.minor.(patch)-(revision) | (int.int.int-hexa)
 f2aac_version = __version__
 verbose = True
 
@@ -52,6 +51,7 @@ class doc():
     """Contains all help strings for argparse"""
     DESC = "Convert flac and mp3 file to aac file"
     INPUT = "file or directory"
+    JOBS = "number of threads for directory encoding"
     OUT = "output directory"
     QUIET = "don't print progress messages"
     VERSION = "print the version of the script."
@@ -178,10 +178,11 @@ def run_directoy(filepaths, out,  nb_threads=4):
         threads.append(threading.Thread(target=encoder, args=[f, out]))
 
     while len(threads) > 0 or len(working_threads) > 0:
-        while len(working_threads) < nb_threads:
-            current = threads.pop()
-            working_threads.append(current)
-            current.start()
+        while len(working_threads) < nb_threads and len(threads) > 0:
+            if (len(threads) > 0):
+                current = threads.pop()
+                working_threads.append(current)
+                current.start()
 
         for thread in working_threads:
             if thread.is_alive() is False:
@@ -198,6 +199,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description=doc.DESC)
     parser.add_argument('input', help=doc.INPUT)
     parser.add_argument('-o', metavar='OUTPUT_DIR', dest='out', help=doc.OUT)
+    parser.add_argument('-j', dest='jobs', type=int, help=doc.JOBS)
     parser.add_argument('-q', dest='quiet', action='store_true', help=doc.QUIET)
     parser.add_argument('--version', action='version', help=doc.VERSION,
                         version='%(prog)s: {}'.format(f2aac_version))
@@ -209,7 +211,10 @@ def main(argv):
             verbose = False
         if os.path.isdir(results.input):  # If it's a directory
             verbose = False
-            run_directoy(listfile(results.input), results.out)
+            if results.jobs:
+                run_directoy(listfile(results.input), results.out, results.jobs)
+            else:
+                run_directoy(listfile(results.input), results.out)
         else:
             encoder(results.input, results.out)
 
