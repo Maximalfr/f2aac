@@ -171,11 +171,23 @@ def run_directoy(filepaths, out,  nb_threads=4):
     # filepaths is a list with direntrys
     #index = -nb_threads  # It's to avoid running threads. We want only the finished threads
     index = 0
+    threads = []
+    working_threads = []
+
     for f in filepaths:
-        while threading.active_count() > nb_threads:
-            sleep(0.5)
-        index += 1
-        threading.Thread(target=encoder, args=[f, out]).start()
+        threads.append(threading.Thread(target=encoder, args=[f, out]))
+
+    while len(threads) > 0 or len(working_threads) > 0:
+        while len(working_threads) < nb_threads:
+            current = threads.pop()
+            working_threads.append(current)
+            current.start()
+
+        for thread in working_threads:
+            if thread.is_alive() is False:
+                working_threads.remove(thread)
+                index += 1
+
         if index >= 0:
             rows, columns = os.popen('stty size', 'r').read().split()
             print_progress(index, len(filepaths), bar_length=(int(columns) - 15))
